@@ -1,0 +1,35 @@
+#!/bin/bash
+
+CUR_PTS=0
+LAST_PTS=0
+result_dir=result
+mkdir -p result
+for file in *.mp4; do
+	echo $file
+	ffprobe -show_packets -select_streams v $file | grep pts= > tmp.txt
+	ffprobe -show_packets -select_streams 1 $file | grep pts= > tmp_audio.txt
+
+	result_file=$result_dir/$file.txt
+	rm $result_file
+	for line in $(cat tmp.txt); do
+		CUR_PTS=$(echo "$line" | cut -d'=' -f2)
+		INTERVAL=$((CUR_PTS-LAST_PTS))
+		#if [ $INTERVAL -ge 60 ]; then
+			echo interval[$INTERVAL] current pts[$CUR_PTS] last pts[$LAST_PTS] >> $result_file
+		#fi
+		LAST_PTS=$CUR_PTS
+	done
+
+	result_file=$result_dir/${file}_audio.txt
+	rm $result_file
+	for line in $(cat tmp_audio.txt); do
+		CUR_PTS=$(echo "$line" | cut -d'=' -f2)
+		INTERVAL=$((CUR_PTS-LAST_PTS))
+		#if [ $INTERVAL -ge 60 ]; then
+			echo interval[$INTERVAL] current pts[$CUR_PTS] last pts[$LAST_PTS] >> $result_file
+		#fi
+		LAST_PTS=$CUR_PTS
+	done
+done
+rm tmp.txt
+rm tmp_audio.txt

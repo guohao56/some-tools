@@ -1,0 +1,5 @@
+echo left video[%1] right video[%2] size[%3x%4] output file[%5]
+
+set /a TOTAL_WIDTH=%3+%3
+
+ffmpeg.exe -i %1 -i %2 -filter_complex "pad=%TOTAL_WIDTH%:%4:color=red[x0];[0:v]scale=w=%3:h=%4[inn0];[x0][inn0]overlay=0:0[x1];[1:v]scale=w=%3:h=%4[inn1];[x1][inn1]overlay=%3:0;" %5
